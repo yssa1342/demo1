@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallpaper Gallery</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Wallpaper Gallery</h1>
+    <nav id="categories"></nav>
+  </header>
+  <main>
+    <section id="wallpaper-grid" class="grid"></section>
+  </main>
+
+  <div id="preview" class="hidden">
+    <div class="overlay"></div>
+    <div class="modal">
+      <img id="preview-image" src="" alt="Preview" />
+      <a id="download-link" href="#" download>Download</a>
+      <button id="close-preview">Close</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
