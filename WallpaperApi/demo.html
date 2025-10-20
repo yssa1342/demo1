@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壁纸网站 - API 演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ 壁纸网站 API 演示</h1>
+            <p>使用 ASP.NET Core Web API 构建</p>
+        </div>
+
+        <div class="card">
+            <div id="status" class="status hidden"></div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('auth')">认证</button>
+                <button class="tab" onclick="showTab('wallpapers')">壁纸</button>
+                <button class="tab" onclick="showTab('profile')">个人资料</button>
+            </div>
+
+            <!-- Authentication Tab -->
+            <div id="auth-tab" class="tab-content active">
+                <h2>用户认证</h2>
+                
+                <h3>注册</h3>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="reg-username" placeholder="输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="reg-email" placeholder="输入邮箱">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="reg-password" placeholder="输入密码">
+                </div>
+                <button onclick="register()">注册</button>
+
+                <hr style="margin: 30px 0;">
+
+                <h3>登录</h3>
+                <div class="form-group">
+                    <label>用户名或邮箱</label>
+                    <input type="text" id="login-username" placeholder="输入用户名或邮箱">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="输入密码">
+                </div>
+                <button onclick="login()">登录</button>
+                <button onclick="getCurrentUser()">获取当前用户</button>
+
+                <div id="auth-result" class="result"></div>
+            </div>
+
+            <!-- Wallpapers Tab -->
+            <div id="wallpapers-tab" class="tab-content">
+                <h2>壁纸管理</h2>
+                
+                <h3>获取壁纸列表</h3>
+                <button onclick="getWallpapers()">获取所有壁纸</button>
+
+                <hr style="margin: 30px 0;">
+
+                <h3>上传壁纸</h3>
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="wallpaper-title" placeholder="壁纸标题">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="wallpaper-desc" rows="3" placeholder="壁纸描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <input type="text" id="wallpaper-category" placeholder="例如：自然、城市、抽象">
+                </div>
+                <div class="form-group">
+                    <label>图片文件</label>
+                    <input type="file" id="wallpaper-image" accept="image/*">
+                </div>
+                <button onclick="uploadWallpaper()">上传壁纸</button>
+
+                <div id="wallpaper-result" class="result"></div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content">
+                <h2>个人资料</h2>
+                
+                <h3>更新个人资料</h3>
+                <div class="form-group">
+                    <label>显示名称</label>
+                    <input type="text" id="profile-displayname" placeholder="显示名称">
+                </div>
+                <div class="form-group">
+                    <label>个人简介</label>
+                    <textarea id="profile-bio" rows="3" placeholder="介绍一下自己"></textarea>
+                </div>
+                <button onclick="updateProfile()">更新资料</button>
+
+                <hr style="margin: 30px 0;">
+
+                <h3>其他操作</h3>
+                <button onclick="getMyWallpapers()">我的壁纸</button>
+                <button onclick="getMyFavorites()">我的收藏</button>
+                <button onclick="getMyComments()">我的评论</button>
+
+                <div id="profile-result" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL - 根据实际情况修改
+        const API_BASE = 'https://localhost:7001/api';
+        let authToken = localStorage.getItem('authToken') || '';
+        let currentUserId = localStorage.getItem('userId') || '';
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 5000);
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function register() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, displayName: username })
+                });
+
+                const data = await response.json();
+                document.getElementById('auth-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUserId = data.user.id;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('userId', currentUserId);
+                    showStatus('注册成功！');
+                } else {
+                    showStatus(data.message || '注册失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function login() {
+            const usernameOrEmail = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usernameOrEmail, password })
+                });
+
+                const data = await response.json();
+                document.getElementById('auth-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUserId = data.user.id;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('userId', currentUserId);
+                    showStatus('登录成功！');
+                } else {
+                    showStatus(data.message || '登录失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function getCurrentUser() {
+            if (!authToken) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                document.getElementById('auth-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('获取用户信息成功');
+                } else {
+                    showStatus('获取用户信息失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function getWallpapers() {
+            try {
+                const response = await fetch(`${API_BASE}/wallpaper?page=1&pageSize=20`);
+                const data = await response.json();
+                document.getElementById('wallpaper-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('获取壁纸列表成功');
+                } else {
+                    showStatus('获取壁纸列表失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function uploadWallpaper() {
+            if (!authToken) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            const title = document.getElementById('wallpaper-title').value;
+            const description = document.getElementById('wallpaper-desc').value;
+            const category = document.getElementById('wallpaper-category').value;
+            const imageFile = document.getElementById('wallpaper-image').files[0];
+
+            if (!title || !imageFile) {
+                showStatus('请填写标题并选择图片', true);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description || '');
+            formData.append('category', category || '');
+            formData.append('image', imageFile);
+
+            try {
+                const response = await fetch(`${API_BASE}/wallpaper`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` },
+                    body: formData
+                });
+
+                const data = await response.json();
+                document.getElementById('wallpaper-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('壁纸上传成功！等待管理员审核');
+                } else {
+                    showStatus(data.message || '上传失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function updateProfile() {
+            if (!authToken) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            const displayName = document.getElementById('profile-displayname').value;
+            const bio = document.getElementById('profile-bio').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/user/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ displayName, bio })
+                });
+
+                const data = await response.json();
+                document.getElementById('profile-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('个人资料更新成功！');
+                } else {
+                    showStatus(data.message || '更新失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function getMyWallpapers() {
+            if (!authToken || !currentUserId) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUserId}/wallpapers`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                document.getElementById('profile-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('获取我的壁纸成功');
+                } else {
+                    showStatus('获取失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function getMyFavorites() {
+            if (!authToken || !currentUserId) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUserId}/favorites`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                document.getElementById('profile-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('获取我的收藏成功');
+                } else {
+                    showStatus('获取失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        async function getMyComments() {
+            if (!authToken || !currentUserId) {
+                showStatus('请先登录', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUserId}/comments`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                document.getElementById('profile-result').textContent = JSON.stringify(data, null, 2);
+
+                if (response.ok) {
+                    showStatus('获取我的评论成功');
+                } else {
+                    showStatus('获取失败', true);
+                }
+            } catch (error) {
+                showStatus('请求失败：' + error.message, true);
+            }
+        }
+
+        // Load saved auth token on page load
+        if (authToken) {
+            showStatus('已登录');
+        }
+    </script>
+</body>
+</html>
