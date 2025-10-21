@@ -1,0 +1,6 @@
+@WallpaperApi_HostAddress = http://localhost:5193
+
+GET {{WallpaperApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
